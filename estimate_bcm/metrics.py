@@ -4,8 +4,9 @@ from sympy import Symbol
 class Metric:
     symb_name = "placeholder_metric"
 
-    def __init__(self):
+    def __init__(self, supplied_value):
         self._symbol = Symbol(self.symb_name)
+        self.supplied_value = supplied_value
 
     @property
     def symbol(self):
@@ -19,8 +20,8 @@ class Metric:
 class LinearMetric(Metric):
     symb_name = "placeholder_linear_metric"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -29,13 +30,15 @@ class LinearMetric(Metric):
     def get_symbolic_eqn(self):
         return self.get_eqn_for_linear_system(self.symbol)
 
+    def get_numeric_eqn(self):
+        return self.get_eqn(self.supplied_value)
 
 
 class Accuracy(LinearMetric):
     symb_name = "acc"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -49,8 +52,8 @@ class Accuracy(LinearMetric):
 class F1_Score(LinearMetric):
     symb_name = "f1"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -64,8 +67,8 @@ class F1_Score(LinearMetric):
 class PPV(LinearMetric):
     symb_name = "ppv"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -79,8 +82,8 @@ class PPV(LinearMetric):
 class ActualPositive(LinearMetric):
     symb_name = "actual_p"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -94,8 +97,8 @@ class ActualPositive(LinearMetric):
 class ActualNegative(LinearMetric):
     symb_name = "actual_n"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -109,8 +112,8 @@ class ActualNegative(LinearMetric):
 class PredictedPositive(LinearMetric):
     symb_name = "pred_p"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
@@ -124,8 +127,8 @@ class PredictedPositive(LinearMetric):
 class PredictedNegative(LinearMetric):
     symb_name = "pred_n"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, supplied_value):
+        super().__init__(supplied_value)
 
     @staticmethod
     def get_eqn(v):
