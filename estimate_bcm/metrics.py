@@ -2,7 +2,6 @@ from typing import Union, Tuple
 from decimal import Decimal
 
 import numpy as np
-from sympy import Symbol
 
 
 class Metric:
@@ -13,8 +12,6 @@ class Metric:
     def __init__(self, supplied_value: Decimal,
                  uncertainty_range_param: Union[str, float, tuple, None] = "round"):
 
-        self._symbol = Symbol(self.symb_name)
-
         self.supplied_value = supplied_value
         self.current_value = float(self.supplied_value)
 
@@ -22,16 +19,11 @@ class Metric:
         self.uncertainty_range = self._compute_uncertainty_range(
             uncertainty_range_param=self.uncertainty_range_param,
             current_value=self.current_value,
-            supplied_value=self.supplied_value
+            supplied_value=self.supplied_value,
+            lower_lim=self.lower_lim,
+            upper_lim=self.upper_lim
         )
 
-        self.uncertainty_range[0] = max(self.uncertainty_range[0], self.lower_lim)
-        self.uncertainty_range[1] = max(self.uncertainty_range[1], self.upper_lim)
-
-
-    @property
-    def symbol(self):
-        return self._symbol
 
     @staticmethod
     def get_expr(cm):
@@ -41,7 +33,8 @@ class Metric:
     @staticmethod
     def _compute_uncertainty_range(uncertainty_range_param: Union[str, float, tuple, None],
                                    current_value: float,
-                                   supplied_value: Decimal):
+                                   supplied_value: Decimal,
+                                   lower_lim: float, upper_lim: float):
 
         if uncertainty_range_param is None:
             uncertainty_range = (current_value, current_value)
@@ -86,6 +79,9 @@ class Metric:
         else:
             raise SyntaxError(f"{uncertainty_range_param} (type: {type(uncertainty_range_param)}) is not a valid uncertainty_range_param; Expected a str, float, tuple, or None")
 
+        # Ensure the range is not outside the allowed range
+        uncertainty_range = (max(lower_lim, uncertainty_range[0]), min(upper_lim, uncertainty_range[1]))
+
         return uncertainty_range
 
 
@@ -123,8 +119,8 @@ class LinearMetric(Metric):
     def get_eqn(v):
         raise NotImplementedError
 
-    def get_symbolic_eqn(self):
-        return self.get_eqn_for_linear_system(self.symbol)
+    def get_symbolic_eqn(self, cm):
+        return self.get_eqn(self.get_expr(cm))
 
     def get_numeric_eqn(self):
         return self.get_eqn(self.current_value)

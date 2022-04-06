@@ -13,7 +13,7 @@ class SymbolicConfusionMatrix:
 
 class NumericalConfusionMatrix:
 
-    def __init__(self, tp=np.nan, fn=np.nan, fp=np.nan, tn=np.nan):
+    def __init__(self, tp: int, fn: int, fp: int, tn: int):
 
         self.tp = tp
         self.fn = fn
