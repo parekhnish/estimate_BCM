@@ -180,6 +180,23 @@ class PPV(LinearMetric):
         return cm.tp / (cm.tp + cm.fp)
 
 
+class NPV(LinearMetric):
+    symb_name = "npv"
+    lower_lim = 0.0
+    upper_lim = 1.0
+
+    def __init__(self, supplied_value: Decimal, **kwargs):
+        super().__init__(supplied_value, **kwargs)
+
+    @staticmethod
+    def get_eqn(v):
+        return ([0, -v, 0, (1-v)], 0)
+
+    @staticmethod
+    def get_expr(cm):
+        return cm.tn / (cm.tn + cm.fn)
+
+
 class ActualPositive(LinearMetric):
     symb_name = "actual_p"
     lower_lim = 0
