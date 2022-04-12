@@ -139,7 +139,7 @@ class Accuracy(LinearMetric):
 
     @staticmethod
     def get_eqn(v):
-        return ([1-v, -v, -v, 1-v], 0)
+        return ([(1-v), -v, -v, (1-v)], 0)
 
     @staticmethod
     def get_expr(cm):
