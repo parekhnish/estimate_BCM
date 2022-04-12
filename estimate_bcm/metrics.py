@@ -299,6 +299,23 @@ class FOR(LinearMetric):
         return cm.fn / (cm.fn + cm.tn)
 
 
+class CSI(LinearMetric):
+    symb_name = "csi"
+    lower_lim = 0.0
+    upper_lim = 1.0
+
+    def __init__(self, supplied_value: Decimal, **kwargs):
+        super().__init__(supplied_value, **kwargs)
+
+    @staticmethod
+    def get_eqn(v):
+        return ([(1-v), -v, -v, 0], 0)
+
+    @staticmethod
+    def get_expr(cm):
+        return cm.tp / (cm.tp + cm.fn + cm.fp)
+
+
 class ActualPositive(LinearMetric):
     symb_name = "actual_p"
     lower_lim = 0
