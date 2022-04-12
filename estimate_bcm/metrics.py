@@ -246,3 +246,20 @@ class PredictedNegative(LinearMetric):
     @staticmethod
     def get_expr(cm):
         return cm.tn + cm.fn
+
+
+class TotalNumberOfItems(LinearMetric):
+    symb_name = "total"
+    lower_lim = 0
+    upper_lim = np.inf
+
+    def __init__(self, supplied_value: Decimal, **kwargs):
+        super().__init__(supplied_value, **kwargs)
+
+    @staticmethod
+    def get_eqn(v):
+        return ([1, 1, 1, 1], v)
+
+    @staticmethod
+    def get_expr(cm):
+        return cm.tp + cm.fn + cm.fp + cm.tn
