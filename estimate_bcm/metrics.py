@@ -231,6 +231,40 @@ class TNR(LinearMetric):
         return cm.tn / (cm.tn + cm.fp)
 
 
+class FNR(LinearMetric):
+    symb_name = "fnr"
+    lower_lim = 0.0
+    upper_lim = 1.0
+
+    def __init__(self, supplied_value: Decimal, **kwargs):
+        super().__init__(supplied_value, **kwargs)
+
+    @staticmethod
+    def get_eqn(v):
+        return ([-v, (1-v), 0, 0], 0)
+
+    @staticmethod
+    def get_expr(cm):
+        return cm.fn / (cm.fn + cm.tp)
+
+
+class FPR(LinearMetric):
+    symb_name = "fpr"
+    lower_lim = 0.0
+    upper_lim = 1.0
+
+    def __init__(self, supplied_value: Decimal, **kwargs):
+        super().__init__(supplied_value, **kwargs)
+
+    @staticmethod
+    def get_eqn(v):
+        return ([0, 0, (1-v), -v], 0)
+
+    @staticmethod
+    def get_expr(cm):
+        return cm.fp / (cm.fp + cm.tn)
+
+
 class ActualPositive(LinearMetric):
     symb_name = "actual_p"
     lower_lim = 0
