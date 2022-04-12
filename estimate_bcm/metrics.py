@@ -10,10 +10,13 @@ class Metric:
     upper_lim = 1.0     # ' ' '
 
     def __init__(self, supplied_value: Decimal,
+                 exact_value: bool = False,
                  uncertainty_range_param: Union[str, float, tuple, None] = "round"):
 
         self.supplied_value = supplied_value
         self.current_value = float(self.supplied_value)
+
+        self.exact_value = exact_value
 
         self.uncertainty_range_param = uncertainty_range_param
         self.uncertainty_range = self._compute_uncertainty_range(
