@@ -24,7 +24,8 @@ class Metric:
             current_value=self.current_value,
             supplied_value=self.supplied_value,
             lower_lim=self.lower_lim,
-            upper_lim=self.upper_lim
+            upper_lim=self.upper_lim,
+            exact_value=exact_value
         )
 
 
@@ -37,9 +38,13 @@ class Metric:
     def _compute_uncertainty_range(uncertainty_range_param: Union[str, float, tuple, None],
                                    current_value: float,
                                    supplied_value: Decimal,
-                                   lower_lim: float, upper_lim: float):
+                                   lower_lim: float, upper_lim: float,
+                                   exact_value: bool):
 
-        if uncertainty_range_param is None:
+        if exact_value:
+            uncertainty_range = (current_value, current_value)
+
+        elif uncertainty_range_param is None:
             uncertainty_range = (current_value, current_value)
 
         elif isinstance(uncertainty_range_param, str):
