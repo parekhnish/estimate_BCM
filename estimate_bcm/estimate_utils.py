@@ -58,9 +58,7 @@ def get_extrema_solution_vertices(exact_obj_tuple, approx_obj_tuple):
         all_numeric_lhs_matrix = sympy.Matrix(numeric_lhs_list)
         all_numeric_lhs_rank = all_numeric_lhs_matrix.rank()
         if all_numeric_lhs_rank < 4:
-            print(curr_approx_value_tuple, tuple_index, "Numeric rank < 4")
-            solution_vertex_dict[tuple_index] = None
-            continue
+            return ("Numeric rank < 4", None)
 
         # Solve the linear system
         all_numeric_rhs_matrix = sympy.Matrix(numeric_rhs_list)
@@ -130,10 +128,6 @@ def exact_3_approx_1(exact_obj_tuple, approx_obj_tuple):
     # There are only two extrema solution vertices
     start_vertex = extrema_solution_vertices[(0,)]
     end_vertex = extrema_solution_vertices[(1,)]
-
-    # Check that they both exist:
-    if ((start_vertex is None) or (end_vertex is None)):
-        return ("Not enough unique extrema solutions", None)
 
     # The basis vector is just the vector from start to end
     basis_vector = end_vertex - start_vertex
