@@ -6,7 +6,7 @@ from confusion_matrix import NumericalConfusionMatrix, SymbolicConfusionMatrix
 
 
 
-def get_basis_vectors(exact_obj_tuple, approx_obj_tuple):
+def get_extrema_solution_vertices(exact_obj_tuple, approx_obj_tuple):
 
     symb_cm = SymbolicConfusionMatrix()
 
@@ -26,7 +26,7 @@ def get_basis_vectors(exact_obj_tuple, approx_obj_tuple):
     all_symbolic_lhs_matrix = sympy.Matrix(symbolic_lhs_list)
     all_symbolic_lhs_rank = all_symbolic_lhs_matrix.rank()
     if all_symbolic_lhs_rank < 4:
-        return ("Symbolic rank < 4", None, None)
+        return ("Symbolic rank < 4", None)
     # -------------------------------------------------------------------------
 
     numeric_lhs_list = [None] * 4
@@ -70,45 +70,7 @@ def get_basis_vectors(exact_obj_tuple, approx_obj_tuple):
         # Add the solution vertex to the solution dict
         solution_vertex_dict[tuple_index] = curr_solution_vertex
 
-    # -------------------------------------------------------------------------
-    # This section checks whether there exists a proper basis for the set of solutions
-    found_valid_set = False
-    for start_k in solution_vertex_dict:
-        start_vertex = solution_vertex_dict[start_k]
-
-        if start_vertex is None:
-            continue
-
-        curr_list_is_valid = True
-        end_vertex_list = []
-        for idx in range(len(start_k)):
-            temp_end_k = list(start_k)
-            temp_end_k[idx] = (temp_end_k[idx] + 1) % 2
-            end_k = tuple(temp_end_k)
-
-            end_vertex = solution_vertex_dict[end_k]
-            if end_vertex is None:
-                curr_list_is_valid = False
-                break
-
-            end_vertex_list.append(end_vertex)
-
-        if not curr_list_is_valid:
-            continue
-
-        start_to_end_vector_list = [(ev - start_vertex) for ev in end_vertex_list]
-        start_to_end_vector_matrix = sympy.Matrix([list(v) for v in start_to_end_vector_list]).T
-
-        found_valid_set = True
-        break
-    # -------------------------------------------------------------------------
-
-    if not found_valid_set:
-        return("Could not find set of basis vectors", None, None)
-    else:
-        return(None, start_vertex, start_to_end_vector_matrix)
-
-
+    return (None, solution_vertex_dict)
 
 
 def get_intersection_of_AP(start_1, step_1,
@@ -160,13 +122,24 @@ def get_intersection_of_AP(start_1, step_1,
 
 def exact_3_approx_1(exact_obj_tuple, approx_obj_tuple):
 
-    bv_error_msg, start_vertex, basis_vector_matrix = get_basis_vectors(exact_obj_tuple, approx_obj_tuple)
+    esv_error_msg, extrema_solution_vertices = get_extrema_solution_vertices(exact_obj_tuple, approx_obj_tuple)
 
-    if bv_error_msg is not None:
-        return bv_error_msg, None
+    if esv_error_msg is not None:
+        return esv_error_msg, None
 
-    # If the basis_vector_matrix is all zeros, there is only one solution: The start vertex!
-    if all([(bve == 0) for bve in basis_vector_matrix]):
+    # There are only two extrema solution vertices
+    start_vertex = extrema_solution_vertices[(0,)]
+    end_vertex = extrema_solution_vertices[(1,)]
+
+    # Check that they both exist:
+    if ((start_vertex is None) or (end_vertex is None)):
+        return ("Not enough unique extrema solutions", None)
+
+    # The basis vector is just the vector from start to end
+    basis_vector = end_vertex - start_vertex
+
+    # If the basis_vector is all zeros, there is only one solution: The start vertex!
+    if all([(bve == 0) for bve in basis_vector]):
         cm = NumericalConfusionMatrix(tp=start_vertex[0], fn=start_vertex[1], fp=start_vertex[2], tn=start_vertex[3])
         return(None, [cm])
 
@@ -177,13 +150,13 @@ def exact_3_approx_1(exact_obj_tuple, approx_obj_tuple):
     step_vec = [None] * 4
 
     for idx in range(4):
-        if basis_vector_matrix[idx] != 0:
-            if basis_vector_matrix[idx] > 0:
-                p0_vec[idx] = (start_vertex[idx].ceiling() - start_vertex[idx]) / basis_vector_matrix[idx]
-                step_vec[idx] = 1 / basis_vector_matrix[idx]
+        if basis_vector[idx] != 0:
+            if basis_vector[idx] > 0:
+                p0_vec[idx] = (start_vertex[idx].ceiling() - start_vertex[idx]) / basis_vector[idx]
+                step_vec[idx] = 1 / basis_vector[idx]
             else:
-                p0_vec[idx] = (start_vertex[idx].floor() - start_vertex[idx]) / basis_vector_matrix[idx]
-                step_vec[idx] = -1 / basis_vector_matrix[idx]
+                p0_vec[idx] = (start_vertex[idx].floor() - start_vertex[idx]) / basis_vector[idx]
+                step_vec[idx] = -1 / basis_vector[idx]
 
     # If any of the p0 elements are > 1, this is an invalid solution
     for p0_elem in p0_vec:
@@ -223,7 +196,7 @@ def exact_3_approx_1(exact_obj_tuple, approx_obj_tuple):
     for mult in sympy.Range(max_mult+1):
 
         curr_p = final_p0 + (mult * final_step)
-        curr_cm_vector = start_vertex + (curr_p * basis_vector_matrix)
+        curr_cm_vector = start_vertex + (curr_p * basis_vector)
 
         curr_cm = NumericalConfusionMatrix(tp=int(curr_cm_vector[0]),
                                            fn=int(curr_cm_vector[1]),
@@ -233,4 +206,3 @@ def exact_3_approx_1(exact_obj_tuple, approx_obj_tuple):
         cm_list.append(curr_cm)
 
     return (None, cm_list)
-
