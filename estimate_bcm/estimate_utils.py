@@ -200,3 +200,45 @@ def exact_3_approx_1(exact_obj_tuple, approx_obj_tuple):
         cm_list.append(curr_cm)
 
     return (None, cm_list)
+
+
+def estimate_by_looping(exact_obj_tuple, approx_obj_tuple):
+
+    esv_error_msg, extrema_solution_vertices = get_extrema_solution_vertices(exact_obj_tuple, approx_obj_tuple)
+
+    if esv_error_msg is not None:
+        return esv_error_msg, None
+
+    num_exact = len(exact_obj_tuple)
+    num_approx = len(approx_obj_tuple)
+
+    # Without loss of generality, choose the vertex denoted by (0, 0, ...)
+    # as the "start" vertex
+    start_index_tuple = tuple([0] * num_approx)
+    start_vertex = extrema_solution_vertices[start_index_tuple]
+
+    # With the above start vertex defined, construct the basis vectors
+    basis_vector_matrix = sympy.zeros(4, num_approx)
+    for idx in range(num_approx):
+        end_index_tuple_list = [0] * num_approx
+        end_index_tuple_list[idx] = 1
+        end_index_tuple = tuple(end_index_tuple_list)
+        end_vertex = extrema_solution_vertices[end_index_tuple]
+
+        basis_vector = end_vertex - start_vertex
+        basis_vector_matrix[:, idx] = basis_vector
+
+    # Find the minimum and maximum extent of coordinates
+    min_coord_vertex = start_vertex.copy()
+    max_coord_vertex = start_vertex.copy()
+    for index_tuple in itertools.product(range(2), repeat=num_approx):
+        curr_vertex = extrema_solution_vertices[index_tuple]
+
+        for r in range(4):
+            min_coord_vertex[r] = sympy.Min(min_coord_vertex[r], curr_vertex[r])
+            max_coord_vertex[r] = sympy.Max(max_coord_vertex[r], curr_vertex[r])
+
+
+    # ----- TODO: The rest!
+
+    return (None, None)
