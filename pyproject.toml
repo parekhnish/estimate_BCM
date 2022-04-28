@@ -10,6 +10,7 @@ python = ">=3.9, <3.11"
 numpy = "^1.22.3"
 scipy = "^1.8.0"
 sympy = "^1.10.1"
+mip = "^1.13.0"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.2.0"
