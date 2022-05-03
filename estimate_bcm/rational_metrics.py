@@ -53,6 +53,15 @@ class LinearMetric(Metric):
         raise NotImplementedError
 
     @classmethod
+    def get_mip_eqn(cls, v, cm):
+        eqn_lhs, eqn_rhs = cls.get_eqn(v)
+
+        output_lhs = (float(eqn_lhs[0]) * cm.tp) + (float(eqn_lhs[1]) * cm.fn) + (float(eqn_lhs[2]) * cm.fp) + (float(eqn_lhs[3]) * cm.tn)
+        output_rhs = eqn_rhs
+
+        return (output_lhs, output_rhs)
+
+    @classmethod
     def get_symbolic_eqn(cls, cm):
         return cls.get_eqn(cls.get_symbolic_expr(cm))
 
