@@ -55,6 +55,29 @@ class MIPConfusionMatrix:
         return
 
 
+    def direct_function_for_optimizing_linear_metric(self, metric_obj: FractionalMetric,
+                                                     optimize_direction: str):
+        """
+        optimize_direction can be one of "min" or "max"
+        """
+
+        best_metric_value = None
+
+        opt_target = metric_obj.get_symbolic_expr(self)
+
+        if optimize_direction == "min":
+            self.model.objective = mip.minimize(opt_target)
+        else:
+            self.model.objective = mip.maximize(opt_target)
+
+
+        optimization_status = self.model.optimize()
+        if optimization_status == mip.OptimizationStatus.OPTIMAL:
+            best_metric_value = self.model.objective_value
+
+        return optimization_status, best_metric_value
+
+
     def iterative_function_for_optimizing_fractional_metric(self, metric_obj: FractionalMetric,
                                                             optimize_direction: str,
                                                             max_num_iterations: int = 100,
@@ -108,17 +131,22 @@ class MIPConfusionMatrix:
                             optimize_direction: str):
         """
         optimize_direction can be one of "min" or "max"
-
         """
 
-        # -----------
-        # TODO: Implement this!
-        if not isinstance(metric_obj, FractionalMetric):
-            raise NotImplementedError("optimize_for_metric() only supports FractionalMetric for now!")
-        # -----------
+        if isinstance(metric_obj, FractionalMetric):
+            optimization_status, iteration_success, best_metric_value = self.iterative_function_for_optimizing_fractional_metric(
+                metric_obj, optimize_direction
+            )
 
-        optimization_status, iteration_success, best_metric_value = self.iterative_function_for_optimizing_fractional_metric(
-            metric_obj, optimize_direction
-        )
+            if not iteration_success:
+                optimization_status = mip.OptimizationStatus.OTHER  # TODO: Find a way to correctly assign this value
 
-        return optimization_status, iteration_success, best_metric_value
+        elif isinstance(metric_obj, LinearMetric):
+            optimization_status, best_metric_value = self.direct_function_for_optimizing_linear_metric(
+                metric_obj, optimize_direction
+            )
+
+        else:
+            raise NotImplementedError("optimize_for_metric() only supports LinearMetric for now!")
+
+        return optimization_status, best_metric_value
