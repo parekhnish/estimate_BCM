@@ -55,7 +55,7 @@ class MIPConfusionMatrix:
         return
 
 
-    def direct_function_for_optimizing_linear_metric(self, metric_obj: FractionalMetric,
+    def direct_function_for_optimizing_linear_metric(self, metric_class,
                                                      optimize_direction: str):
         """
         optimize_direction can be one of "min" or "max"
@@ -63,7 +63,7 @@ class MIPConfusionMatrix:
 
         best_metric_value = None
 
-        opt_target = metric_obj.get_symbolic_expr(self)
+        opt_target = metric_class.get_symbolic_expr(self)
 
         if optimize_direction == "min":
             self.model.objective = mip.minimize(opt_target)
@@ -78,7 +78,7 @@ class MIPConfusionMatrix:
         return optimization_status, best_metric_value
 
 
-    def iterative_function_for_optimizing_fractional_metric(self, metric_obj: FractionalMetric,
+    def iterative_function_for_optimizing_fractional_metric(self, metric_class,
                                                             optimize_direction: str,
                                                             max_num_iterations: int = 100,
                                                             iter_obj_epsilon: float = 1e-5):
@@ -89,7 +89,7 @@ class MIPConfusionMatrix:
         https://optimization.cbe.cornell.edu/index.php?title=Mixed-integer_linear_fractional_programming_(MILFP)#Parametric_Algorithm
         """
 
-        target_num, target_den = metric_obj.get_fractional_repr(self)
+        target_num, target_den = metric_class.get_fractional_repr(self)
 
         optimization_status = None
         best_metric_value = None
@@ -127,26 +127,26 @@ class MIPConfusionMatrix:
         return optimization_status, iteration_success, best_metric_value
 
 
-    def optimize_for_metric(self, metric_obj: LinearMetric,
+    def optimize_for_metric(self, metric_class,
                             optimize_direction: str):
         """
         optimize_direction can be one of "min" or "max"
         """
 
-        if isinstance(metric_obj, FractionalMetric):
+        if issubclass(metric_class, FractionalMetric):
             optimization_status, iteration_success, best_metric_value = self.iterative_function_for_optimizing_fractional_metric(
-                metric_obj, optimize_direction
+                metric_class, optimize_direction
             )
 
             if not iteration_success:
                 optimization_status = mip.OptimizationStatus.OTHER  # TODO: Find a way to correctly assign this value
 
-        elif isinstance(metric_obj, LinearMetric):
+        elif issubclass(metric_class, LinearMetric):
             optimization_status, best_metric_value = self.direct_function_for_optimizing_linear_metric(
-                metric_obj, optimize_direction
+                metric_class, optimize_direction
             )
 
         else:
-            raise NotImplementedError("optimize_for_metric() only supports LinearMetric for now!")
+            raise NotImplementedError("optimize_for_metric() only supports LinearMetric and subclasses for now!")
 
         return optimization_status, best_metric_value
