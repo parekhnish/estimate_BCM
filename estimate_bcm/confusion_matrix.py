@@ -112,17 +112,23 @@ class MIPConfusionMatrix:
                 optimization_status = status
                 break
 
-            computed_num = target_num.x
-            computed_den = target_den.x
-            q = computed_num / computed_den
-
             if self.model.objective_value < iter_obj_epsilon:
                 iteration_success = True
                 break
 
+            q = target_num.x / target_den.x
+
+
         if iteration_success:
             optimization_status = mip.OptimizationStatus.OPTIMAL
-            best_metric_value = computed_num / computed_den
+
+            if target_den.x == 0:
+                if target_num.x == 0:
+                    best_metric_value = 0
+                else:
+                    raise ZeroDivisionError
+            else:
+                best_metric_value = target_num.x / target_den.x
 
         return optimization_status, iteration_success, best_metric_value
 
