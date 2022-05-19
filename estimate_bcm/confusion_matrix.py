@@ -130,7 +130,11 @@ class MIPConfusionMatrix:
             else:
                 best_metric_value = target_num.x / target_den.x
 
-        return optimization_status, iteration_success, best_metric_value
+        else:
+            if status == mip.OptimizationStatus.OPTIMAL:    # I.e. OPTIMAL, but not iteration_success --> Iteration ended without error, but without reaching optimal value
+                optimization_status = mip.OptimizationStatus.OTHER
+
+        return optimization_status, best_metric_value
 
 
     def optimize_for_metric(self, metric_class,
@@ -140,12 +144,9 @@ class MIPConfusionMatrix:
         """
 
         if issubclass(metric_class, FractionalMetric):
-            optimization_status, iteration_success, best_metric_value = self.iterative_function_for_optimizing_fractional_metric(
+            optimization_status, best_metric_value = self.iterative_function_for_optimizing_fractional_metric(
                 metric_class, optimize_direction
             )
-
-            if not iteration_success:
-                optimization_status = mip.OptimizationStatus.OTHER  # TODO: Find a way to correctly assign this value
 
         elif issubclass(metric_class, LinearMetric):
             optimization_status, best_metric_value = self.direct_function_for_optimizing_linear_metric(
